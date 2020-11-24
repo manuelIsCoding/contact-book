@@ -6,6 +6,7 @@
         This is a beginner project, it's a contact book in that use
         a Command Line Interface to create, read, update, and delete
         contacts that will be saved in a database by using SQLite3.
+    Lang: es_MX
 """
 from typing import List, Tuple
 import os
