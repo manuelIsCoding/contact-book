@@ -11,11 +11,12 @@ The contacts will be saved in a local database using SQLite3.
     
         git clone https://github.com/manuelIsCoding/contact-book.git
 
-- Activate the Python virtual environment and install the `requirements.txt`
+- Create a Python virtual environment and install the `requirements.txt`
 
         cd contact-book
+        python3 -m venv venv
         source venv/bin/activate
-        pip install -r requirements
+        pip3 install -r requirements
 
 - Run `main.py`
 
