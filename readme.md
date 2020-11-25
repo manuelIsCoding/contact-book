@@ -1,7 +1,7 @@
 # **Contact book**
 ![](./example.png)
 ## **Description**
-This is simple a personal beginner Python project.
+This is a simple and personal beginner Python project.
 
 It's a command-line application in that you can create, read, 
 update and delete contacts by using a CLI (Command-line Inteface) 

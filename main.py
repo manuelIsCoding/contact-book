@@ -11,10 +11,10 @@
 from typing import List, Tuple
 import os
 import sys
-import sqlite3
 import functools
 import time
 from cli.menu import Menu
+from helpers.sqliteconnect import SQLiteConnect
 
 
 def create_database(func):
@@ -22,23 +22,16 @@ def create_database(func):
     def wrapper(*args, **kwargs):
         abs_path = os.path.abspath(os.getcwd()) + '/.contacts.db'
         if not os.path.exists(abs_path):
-            try:
-                db_connection = sqlite3.connect(abs_path)
+            with SQLiteConnect(abs_path) as db_connection:
                 cursor = db_connection.cursor()
                 cursor.execute('CREATE TABLE contacts '
                                '(name, phone_num);')
                 db_connection.commit()
-            except sqlite3.Error as err:
-                print(err)
-            finally:
-                if db_connection:
-                    db_connection.close()
         return func(*args, **kwargs)
     return wrapper
 
-def display_all_contacts():
-    try:
-        db_connection = sqlite3.connect('.contacts.db')
+def display_all_contacts() -> None:
+    with SQLiteConnect('.contacts.db') as db_connection:
         cursor = db_connection.cursor()
         cursor.execute('SELECT * FROM contacts;')
         all_contacts = cursor.fetchall()
@@ -51,55 +44,38 @@ def display_all_contacts():
             print('\n')
         else:
             print('Sin contactos.\n')
+        
         db_connection.commit()
-    except sqlite3.Error as err:
-        print(err)
-    finally:
-        if db_connection:
-            db_connection.close()
 
 def save_contact(name: str, phone_num: str) -> str:
-    try:
-        db_connection = sqlite3.connect('.contacts.db')
+    with SQLiteConnect('.contacts.db') as db_connection:
         cursor = db_connection.cursor()
         cursor.execute('INSERT INTO contacts VALUES (?, ?)',
                        (name, phone_num))
         db_connection.commit()
         return '¡Contacto guardado satisfactoriamente!\n'
-    except sqlite3.Error as err:
-        return err
-    finally:
-        if db_connection:
-            db_connection.close()        
 
 def _search_contact(name: str) -> tuple:
-    try:
-        conn = sqlite3.connect('.contacts.db')
-        cur = conn.cursor()
+    with SQLiteConnect('.contacts.db') as db_connection:
+        cur = db_connection.cursor()
         cur.execute('SELECT * FROM contacts WHERE name=:name;',
                     {'name': name})
         contact = cur.fetchone()
-        conn.commit()
+        db_connection.commit()
         return contact
-    except sqlite3.Error as err:
-        return err
-    finally:
-        if conn:
-            conn.close()
 
 def edit_contact(name: str) -> str:
     contact = _search_contact(name)
-    if type(contact) == tuple:    
+    if type(contact) == tuple:
         print('AVISO: Deje la entrada que no desee editar vacía.\n')
         new_name = input('Nuevo nombre: ')
         new_phone_num = input('Nuevo teléfono: ')
-        if not new_name:
+        if not new_name.strip():
             new_name = contact[0]
-        elif not new_phone_num:
+        if not new_phone_num.strip():
             new_phone_num = contact[1]
 
-        try:
-            db_connection = sqlite3.connect('.contacts.db')
+        with SQLiteConnect('.contacts.db') as db_connection:
             cursor = db_connection.cursor()
             cursor.execute('''
                 UPDATE contacts
@@ -108,29 +84,18 @@ def edit_contact(name: str) -> str:
             ''', (new_name, new_phone_num, name))
             db_connection.commit()
             return '¡Contacto editado satisfactoriamente!'
-        except sqlite3.Error as err:
-            return err
-        finally:
-            if db_connection:
-                db_connection.close()
     
     return f'\nContacto "{name}" no encontrado.'
 
 def delete_contact(name: str) -> str:
     contact = _search_contact(name)
     if type(contact) == tuple:
-        try:
-            db_connection = sqlite3.connect('.contacts.db')
+        with SQLiteConnect('.contacts.db') as db_connection:
             cursor = db_connection.cursor()
             cursor.execute('DELETE FROM contacts WHERE name=:name',
                           {'name': name})
             db_connection.commit()
             return f'El contacto "{name}" ha sido eliminado.'
-        except sqlite3.Error as err:
-            return err
-        finally:
-            if db_connection:
-                db_connection.close()
     
     return f'\nContacto "{name}" no encontrado.'
 
