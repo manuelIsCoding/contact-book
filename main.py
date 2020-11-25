@@ -123,7 +123,7 @@ def main() -> None:
     cli_options = [
         'Save a contact',
         'Edit a contact',
-        'Delte a contact',
+        'Delete a contact',
         'Exit'
     ]
     cli_menu = Menu(cli_options)
