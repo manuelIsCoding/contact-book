@@ -6,13 +6,12 @@
         This is a beginner project, it's a contact book in that use
         a Command Line Interface to create, read, update, and delete
         contacts that will be saved in a database by using SQLite3.
-    Lang: es_MX
+    Lang: English
 """
 from typing import List, Tuple, Callable
 import os
 import sys
 import functools
-import time
 from cli.menu import Menu
 from helpers.sqliteconnect import SQLiteConnect
 
@@ -42,15 +41,14 @@ def display_all_contacts() -> None:
         cursor = db_connection.cursor()
         cursor.execute('SELECT * FROM contacts;')
         all_contacts = cursor.fetchall()
+        print('\n--- Your contacts ---')
         if all_contacts:
-            print('Contactos:')
             for id, contact in enumerate(all_contacts):
                 name, phone_num = contact
                 print(f'{id + 1}: {name} - {phone_num}')
-            time.sleep(1)
             print('\n')
         else:
-            print('Sin contactos.\n')
+            print('No contacts yet.\n')
         
         db_connection.commit()
 
@@ -62,7 +60,7 @@ def save_contact(name: str, phone_num: str) -> str:
         cursor.execute('INSERT INTO contacts VALUES (?, ?)',
                        (name, phone_num))
         db_connection.commit()
-        return '¡Contacto guardado satisfactoriamente!\n'
+        return 'Contact saved successfully!\n'
 
 def _search_contact(name: str) -> tuple:
     """Internal function used to search a contact using `name`
@@ -79,10 +77,10 @@ def edit_contact(name: str) -> str:
     """Edit the contact found by `name` parameter."""
     contact = _search_contact(name)
     if type(contact) == tuple:
-        print('AVISO: Deje la entrada que no desee editar vacía.\n')
+        print("Advice: Leave the entry empty if you don't wanna update it.\n")
 
-        new_name = input('Nuevo nombre: ')
-        new_phone_num = input('Nuevo teléfono: ')
+        new_name = input('New name: ')
+        new_phone_num = input('New phone number: ')
         if not new_name.strip():
             new_name = contact[0]
         if not new_phone_num.strip():
@@ -99,9 +97,9 @@ def edit_contact(name: str) -> str:
                 'new_phone_num': new_phone_num,
                 'name': name})
             db_connection.commit()
-            return '¡Contacto editado satisfactoriamente!'
+            return 'Contact updated successfully!'
     
-    return f'\nContacto "{name}" no encontrado.'
+    return f'\nContact "{name}" not found'
 
 def delete_contact(name: str) -> str:
     """Deletes a contact found by `name` parameter."""
@@ -112,9 +110,9 @@ def delete_contact(name: str) -> str:
             cursor.execute('DELETE FROM contacts WHERE name=:name',
                           {'name': name})
             db_connection.commit()
-            return f'El contacto "{name}" ha sido eliminado.'
+            return f'Contact "{name}" has been deleted.'
     
-    return f'\nContacto "{name}" no encontrado.'
+    return f'\nContact "{name}" not found.'
 
 @_create_database
 def main() -> None:
@@ -123,31 +121,32 @@ def main() -> None:
     display_all_contacts()
 
     cli_options = [
-        'Guardar un contacto',
-        'Editar un contacto',
-        'Eliminar un contacto',
-        'Salir'
+        'Save a contact',
+        'Edit a contact',
+        'Delte a contact',
+        'Exit'
     ]
     cli_menu = Menu(cli_options)
+    print('--- Menu ---')
     cli_menu.display()
 
-    user_option = cli_menu.get_option('Selecciona: ')
+    user_option = cli_menu.get_option('Option: ')
     if user_option == cli_options[-1]:
         sys.exit(0)
 
     elif user_option == cli_options[0]:
-        name = input('Nombre: ')
-        phone_num = input('Teléfono: ')
+        name = input('Name: ')
+        phone_num = input('Phone number: ')
         print(save_contact(name, phone_num))
 
     elif user_option == cli_options[1]:
         display_all_contacts()
-        name = input('Nombre del contacto a editar: ')
+        name = input('Name of contact to edit: ')
         print(edit_contact(name))
 
     elif user_option == cli_options[2]:
         display_all_contacts()
-        name = input('Nombre del contacto a eliminar: ')
+        name = input('Name of contacto to delete: ')
         print(delete_contact(name))
     
     main()
