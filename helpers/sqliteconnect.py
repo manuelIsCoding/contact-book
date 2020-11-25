@@ -1,7 +1,10 @@
-# Context manager for connect to SQLite database
 import sqlite3
 
+
 class SQLiteConnect:
+    """A class that supports the `with` statement through context
+    manager protocol (it contains the dunder methods`__enter__`
+    and `__exit__`)."""
     def __init__(self, db_path):
         self.db_path = db_path
     
